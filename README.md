@@ -14,8 +14,8 @@ Python scripts to automate and process Markdown files in batches. Scans director
 Clone this repo and install the dependencies:
 
 ```bash
-git clone https://github.com/yourusername/markdown-handler-python.git
-cd markdown-handler-python
+git clone https://github.com/NonakaVal/Obsidian-Python-Scripts.git
+cd Obsidian-Python-Scripts
 pip install -r requirements.txt
 ```
 

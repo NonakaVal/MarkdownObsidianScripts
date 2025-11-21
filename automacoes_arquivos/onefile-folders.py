@@ -7,7 +7,7 @@ from collections import defaultdict
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
 
 # 📌 Pasta de saída fixa
-PASTA_SAIDA = Path(r"C:\Users\nonak\OneDrive\Área de Trabalho\Thoughts\ATLAS\03_RESOURCES\NotebookLM-Sources-md\Dusk_separado")
+PASTA_SAIDA = Path(r"/home/nonaka/Documentos/GitHub/Obsidian-Python-Scripts")
 
 # Garante que a pasta existe
 PASTA_SAIDA.mkdir(parents=True, exist_ok=True)
