@@ -66,7 +66,7 @@ def select_module():
         header("PyBox — Selecionar módulo")
 
         for i, (key, data) in enumerate(modules, start=1):
-            print(f"{i:02d}. {data['label']}")
+            print(f"{i:01d}. {data['label']}")
 
         print("\nq. sair")
 
@@ -99,7 +99,7 @@ def select_script(module_key, module_data):
 
         for i, script in enumerate(scripts, start=1):
             rel = script.relative_to(module_path)
-            print(f"{i:02d}. {rel}")
+            print(f"{i:01d}. {rel}")
 
         print("\nb. voltar")
         print("q. sair")

@@ -4,18 +4,14 @@
 file_tools/exporter.py
 Exporta arquivos de texto/código de uma ou mais pastas para TXT consolidado.
 Cada subpasta gera um arquivo .txt no diretório onde o comando foi chamado.
-Suporta múltiplos caminhos de entrada e filtro por extensão.
 """
 
 import os
-import sys
 from pathlib import Path
 from collections import defaultdict
 
-# ── Ambiente PyBox ────────────────────────────────────────────────────────
 CALL_DIR = Path(os.environ.get("PYBOX_CALL_DIR", Path.cwd()))
 
-# ── Extensões suportadas ──────────────────────────────────────────────────
 EXTENSOES_TEXTO = {
     ".md", ".txt", ".py", ".js", ".ts", ".json", ".yaml", ".yml",
     ".html", ".css", ".sh", ".bash", ".zsh",
@@ -26,8 +22,6 @@ EXTENSOES_TEXTO = {
 
 MAX_FILE_SIZE_MB = 2
 
-
-# ── Helpers ───────────────────────────────────────────────────────────────
 
 def is_text_file(path: Path, extensoes: set) -> bool:
     if path.suffix.lower() not in extensoes:
@@ -71,8 +65,6 @@ def sanitizar_nome(nome: str) -> str:
 def coletar_arquivos(pasta: Path, extensoes: set) -> list[Path]:
     return sorted(p for p in pasta.rglob("*") if p.is_file() and is_text_file(p, extensoes))
 
-
-# ── Exportação ────────────────────────────────────────────────────────────
 
 def exportar_pasta(pasta: Path, saida_dir: Path, extensoes: set, prefixo: str = "") -> tuple[int, int]:
     if not pasta.exists():
@@ -122,8 +114,6 @@ def exportar_pasta(pasta: Path, saida_dir: Path, extensoes: set, prefixo: str = 
     return total_txts, total_arqs
 
 
-# ── Entrypoint ────────────────────────────────────────────────────────────
-
 def main():
     print("\n╭──────────────────────────────────────╮")
     print("│  File Exporter                       │")
@@ -146,9 +136,7 @@ def main():
         return
 
     print(f"\nExtensões disponíveis: {', '.join(sorted(EXTENSOES_TEXTO))}")
-    ext_input = input(
-        "🔧 Extensões (separadas por vírgula, ENTER para todas): "
-    ).strip()
+    ext_input = input("🔧 Extensões (separadas por vírgula, ENTER para todas): ").strip()
 
     if ext_input:
         extensoes = {e.strip() if e.strip().startswith(".") else f".{e.strip()}"
