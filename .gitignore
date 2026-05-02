@@ -1,12 +1,10 @@
-
-.vscode/
-.vscode
-.virtual_documents/
-.ipynb_checkpoints/
-.anaconda_projects/
-
-.anaconda_projects/db/
-.anaconda_projects/db
-
+# Python cache files
 __pycache__/
+*.py[cod]
 
+# Local test/temporary folder for unfinished experiments
+modules/+
+
+# Ignore generated or temporary module outputs
+modules/gallery_tools/
+modules/manga_reader/
