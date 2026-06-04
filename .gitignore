@@ -8,3 +8,12 @@ modules/+
 # Ignore generated or temporary module outputs
 modules/gallery_tools/
 modules/manga_reader/
+
+# Auto Claude generated files
+.auto-claude/
+.auto-claude-security.json
+.auto-claude-status
+.claude_settings.json
+.worktrees/
+.security-key
+logs/security/
