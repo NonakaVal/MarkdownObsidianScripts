@@ -4,11 +4,9 @@
 audio/transcriber.py
 Transcreve áudios usando Whisper.
 Modos: simples (texto) ou com timestamps (segmentado).
-Saída gerada no diretório onde o comando foi chamado.
+Saída gerada por padrão em /home/val/Documentos/Notepad/+.
 """
 
-import os
-import sys
 import time
 import wave
 import tempfile
@@ -18,8 +16,8 @@ from datetime import datetime
 
 import numpy as np
 
-# ── Ambiente PyBox ────────────────────────────────────────────────────────
-CALL_DIR = Path(os.environ.get("PYBOX_CALL_DIR", Path.cwd()))
+# ── Saída padrão ──────────────────────────────────────────────────────────
+DEFAULT_OUTPUT_DIR = Path("/home/val/Documentos/Notepad/+")
 
 
 # ── Helpers de áudio ─────────────────────────────────────────────────────
@@ -65,6 +63,36 @@ def fmt_tempo(s: float) -> str:
     return f"{h}:{m:02d}:{seg:02d}" if h else f"{m:02d}:{seg:02d}"
 
 
+# ── Carregamento do modelo ────────────────────────────────────────────────
+
+def carregar_modelo(modelo_nome: str):
+    """Carrega o modelo Whisper priorizando GPU, com fallback para CPU em OOM."""
+    import os
+    import torch
+    import whisper
+
+    os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")
+
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+        try:
+            modelo = whisper.load_model(modelo_nome, device="cuda")
+            livres = torch.cuda.mem_get_info()[0] / (1024 ** 3)
+            print(f"🟢 '{modelo_nome}' na GPU ({livres:.1f} GiB livres)")
+            return modelo
+        except (torch.cuda.OutOfMemoryError, RuntimeError) as e:
+            print(f"⚠️  GPU sem memória — caindo para CPU ({type(e).__name__}).")
+
+    modelo = whisper.load_model(modelo_nome, device="cpu")
+    print(f"🟡 '{modelo_nome}' na CPU")
+    return modelo
+
+
+def _fp16_do_modelo(modelo) -> bool:
+    """fp16 só na GPU — CPU não suporta bem, e economiza VRAM na placa."""
+    return getattr(getattr(modelo, "device", None), "type", "") == "cuda"
+
+
 # ── Transcrição simples ───────────────────────────────────────────────────
 
 def transcrever_simples(caminho: Path, modelo) -> str | None:
@@ -73,7 +101,7 @@ def transcrever_simples(caminho: Path, modelo) -> str | None:
         return None
     try:
         t0 = time.time()
-        resultado = modelo.transcribe(str(wav), fp16=False)
+        resultado = modelo.transcribe(str(wav), fp16=_fp16_do_modelo(modelo))
         print(f"  ✔ {time.time() - t0:.1f}s")
         return resultado["text"].strip()
     except Exception as e:
@@ -90,7 +118,7 @@ def transcrever_timestamps(caminho: Path, modelo, silencio_min: float):
     try:
         duracao = duracao_wav(wav)
         t0 = time.time()
-        resultado = modelo.transcribe(str(wav), fp16=False)
+        resultado = modelo.transcribe(str(wav), fp16=_fp16_do_modelo(modelo))
         print(f"  ✔ {time.time() - t0:.1f}s")
 
         itens = []
@@ -116,7 +144,7 @@ def transcrever_timestamps(caminho: Path, modelo, silencio_min: float):
 
 def frontmatter(extra: dict | None = None) -> str:
     hoje = datetime.now().strftime("%Y-%m-%d")
-    linhas = ["---", f'created: "[[{hoje}]]"', "tags:", "  - transcriptions"]
+    linhas = ["---", f'dateCreated: "[[{hoje}]]"', "tags:", "  - transcriptions"]
     if extra:
         for k, v in extra.items():
             linhas.append(f'{k}: "{v}"')
@@ -135,7 +163,9 @@ def modo_simples():
         return
 
     modelo_nome = input("🤖 Modelo Whisper [medium]: ").strip() or "medium"
-    saida_nome = input(f"💾 Nome do arquivo de saída [transcricoes.md]: ").strip() or "transcricoes.md"
+    saida_default = DEFAULT_OUTPUT_DIR / "transcricoes.md"
+    saida_str = input(f"💾 Arquivo de saída [{saida_default}]: ").strip()
+    saida = Path(saida_str).expanduser().resolve() if saida_str else saida_default
 
     audios = listar_audios(pasta)
     if not audios:
@@ -144,15 +174,14 @@ def modo_simples():
 
     print(f"\n📥 {len(audios)} arquivo(s) encontrado(s).")
 
-    import whisper
-    modelo = whisper.load_model(modelo_nome)
+    modelo = carregar_modelo(modelo_nome)
 
     grupos: dict[str, list[Path]] = {}
     for a in audios:
         rel = str(a.parent.relative_to(pasta))
         grupos.setdefault(rel, []).append(a)
 
-    saida = CALL_DIR / saida_nome
+    saida.parent.mkdir(parents=True, exist_ok=True)
     with open(saida, "w", encoding="utf-8") as f:
         f.write(frontmatter())
         for pasta_rel, arquivos in sorted(grupos.items()):
@@ -188,7 +217,9 @@ def modo_timestamps():
         except ValueError:
             pass
 
-    saida_nome = input(f"💾 Nome do arquivo de saída [transcricoes_ts.md]: ").strip() or "transcricoes_ts.md"
+    saida_default = DEFAULT_OUTPUT_DIR / "transcricoes_ts.md"
+    saida_str = input(f"💾 Arquivo de saída [{saida_default}]: ").strip()
+    saida = Path(saida_str).expanduser().resolve() if saida_str else saida_default
 
     audios = listar_audios(pasta)
     if not audios:
@@ -197,8 +228,7 @@ def modo_timestamps():
 
     print(f"\n📥 {len(audios)} arquivo(s) encontrado(s).")
 
-    import whisper
-    modelo = whisper.load_model(modelo_nome)
+    modelo = carregar_modelo(modelo_nome)
 
     grupos: dict[str, list[Path]] = {}
     for a in audios:
@@ -218,7 +248,7 @@ def modo_timestamps():
                 dados[rel].append((audio, itens, dur))
 
     hoje = datetime.now().strftime("%Y-%m-%d")
-    saida = CALL_DIR / saida_nome
+    saida.parent.mkdir(parents=True, exist_ok=True)
 
     with open(saida, "w", encoding="utf-8") as f:
         f.write(frontmatter({
