@@ -1,7 +1,16 @@
+import os
 from pathlib import Path
 
 PYBOX_ROOT = Path(__file__).resolve().parent
 MODULES_DIR = PYBOX_ROOT / "modules"
+
+# Configuração do ambiente e integrações externas
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "SUA_CHAVE_AQUI")
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+GEMINI_API_URL = (
+    f"https://generativelanguage.googleapis.com/v1beta/models/"
+    f"{GEMINI_MODEL}:generateContent?key={GEMINI_API_KEY}"
+)
 
 MODULES = {
     "audio": {

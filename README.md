@@ -1,18 +1,43 @@
 # PyBox
 
-Meus Scripts Python com diversos usos acumulado nesses anos de estudo centralizados para rodar por um comando no terminal debian, até atualizar esse repo eu usava de forma convencional abrindo/navegando/rodando, mas acho que já tenho códigos o bastante. por fim, adicionei globalmente o comando pybox que me permite escolher o que quero rodar organizado listas e módulos... 
+Coleção de scripts Python organizados em módulos para rodar a partir de um menu central no terminal.
 
 ## Estrutura
 
 - `pybox.py`: menu principal para escolher módulos e scripts
-- `config.py`: define os módulos e caminhos
+- `config.py`: define os módulos, caminhos e configurações globais do projeto
+- `requirements.txt`: dependências básicas do ambiente
 - `modules/`: scripts agrupados em pastas como `audio`, `file_tools`, `gallery_tools`, `index_notes`, `manga_reader`, `obsidian_tools`, `shell_tools`
+
+## Setup
+
+1. Entre na pasta do projeto:
+   `cd /home/val/Github/PyBox`
+2. Crie e ative um ambiente virtual (opcional, mas recomendado):
+   `python3 -m venv .venv`
+   `source .venv/bin/activate`
+3. Instale as dependências:
+   `pip install -r requirements.txt`
 
 ## Uso
 
 1. Execute `python3 pybox.py`
 2. Selecione um módulo
 3. Escolha um script para rodar
+
+## Configuração da API Gemini
+
+O módulo de commit assistido usa as variáveis abaixo, definidas em `config.py`:
+
+- `GEMINI_API_KEY`
+- `GEMINI_MODEL`
+- `GEMINI_API_URL`
+
+Você pode definir a chave da API no ambiente antes de executar o script:
+
+```bash
+export GEMINI_API_KEY="sua_chave"
+```
 
 ## Ambiente
 
