@@ -16,8 +16,18 @@ Coleção de scripts Python organizados em módulos para rodar a partir de um me
 2. Crie e ative um ambiente virtual (opcional, mas recomendado):
    `python3 -m venv .venv`
    `source .venv/bin/activate`
-3. Instale as dependências:
+3. Instale as dependências básicas:
    `pip install -r requirements.txt`
+
+### Dependências adicionais para recursos de áudio
+
+Alguns módulos de áudio e transcrição precisam de pacotes extras, como `openai-whisper` e `torch`. Eles podem ser instalados separadamente quando necessário:
+
+```bash
+pip install openai-whisper torch
+```
+
+Além disso, o projeto depende de ferramentas de sistema como `ffmpeg` e `ffprobe` para processamento de áudio.
 
 ## Uso
 
