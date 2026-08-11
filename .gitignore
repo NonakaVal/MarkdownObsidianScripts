@@ -7,6 +7,9 @@ __pycache__/
 .env.*
 !.env.example
 
+# VS Code local settings
+.vscode/
+
 # Local test/temporary folder for unfinished experiments
 modules/+
 
